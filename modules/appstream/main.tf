@@ -63,6 +63,11 @@ resource "aws_appstream_stack" "this" {
     preferred_protocol = var.preferred_protocol
   }
 
+  access_endpoints {
+    endpoint_type = var.endpoint_type
+    vpce_id = var.vpce_id
+  }
+
   tags = var.tags
 }
 

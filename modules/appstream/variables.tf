@@ -52,6 +52,12 @@ variable "enabled" {
   default = false
 }
 
+variable "endpoint_type" {
+  description = "(Required) Type of the interface endpoint. See the AccessEndpoint AWS API documentation for valid values."
+  type = string
+  default = null
+}
+
 variable "feedback_url" {
   description = "(Optional) URL that users are redirected to after they click the Send Feedback link. If no URL is specified, no Send Feedback link is displayed."
   type = string
@@ -180,8 +186,13 @@ variable "stream_view" {
 }
 
 variable "user_settings" {
-  description = "value"
+  description = "(Optional) Configuration block for the actions that are enabled or disabled for users during their streaming sessions. If not provided, these settings are configured automatically by AWS. If provided, the terraform configuration should include a block for each configurable action"
   type = list(map(string))
   default = []
 }
 
+variable "vpce_id" {
+  description = "(Optional) ID of the VPC in which the interface endpoint is used."
+  type = string
+  default = null
+}
