@@ -2,118 +2,73 @@
 /************************************************************************************
 Resources
 ************************************************************************************/
-resource "aws_appstream_directory_config" "this" {
-  directory_name                          = var.directory_name
-  organizational_unit_distinguished_names = var.organizational_unit_distinguished_names
-
-  service_account_credentials {
-    account_name     = var.account_name
-    account_password = var.account_password
-  }
-}
-
-resource "aws_appstream_image_builder" "this" {
-  name                           = "Name"
-  description                    = "Description of a ImageBuilder"
-  display_name                   = "Display name of a ImageBuilder"
-  enable_default_internet_access = false
-  image_name                     = "AppStream-WinServer2019-10-05-2022"
-  instance_type                  = "stream.standard.large"
-
-  vpc_config {
-    subnet_ids = [aws_subnet.example.id]
-  }
-
-  tags = {
-    Name = "Example Image Builder"
-  }
-}
-
 resource "aws_appstream_fleet" "this" {
-  name = "test-fleet"
+  name = var.fleet_name
 
   compute_capacity {
-    desired_instances = 1
+    desired_instances = var.desired_instances
   }
 
-  description                        = "test fleet"
-  idle_disconnect_timeout_in_seconds = 60
-  display_name                       = "test-fleet"
-  enable_default_internet_access     = false
-  fleet_type                         = "ON_DEMAND"
-  image_name                         = "Amazon-AppStream2-Sample-Image-03-11-2023"
-  instance_type                      = "stream.standard.large"
-  max_user_duration_in_seconds       = 600
+  description                        = var.fleet_description
+  idle_disconnect_timeout_in_seconds = var.idle_disconnect_timeout_in_seconds
+  disconnect_timeout_in_seconds      = var.disconnect_timeout_in_seconds 
+  display_name                       = var.fleet_display_name
+  enable_default_internet_access     = var.enable_default_internet_access
+  fleet_type                         = upper(var.fleet_type)
+  image_name                         = var.image_name
+  instance_type                      = var.instance_type
+  max_user_duration_in_seconds       = var.max_user_duration_in_seconds
 
   vpc_config {
-    subnet_ids = ["subnet-06e9b13400c225127"]
+    security_group_ids = var.security_group_ids
+    subnet_ids = var.subnet_ids
   }
 
   domain_join_info {
-    directory_name = "test domain"
-    organizational_unit_distinguished_name = "CN"
+    directory_name = var.directory_name
+    organizational_unit_distinguished_name = var.organizational_unit_distinguished_name
   }
 
-  tags = {
-    TagName = "tag-value"
-  }
+  tags = var.tags
 }
 
-resource "aws_appstream_fleet_stack_association" "example" {
-  fleet_name = aws_appstream_fleet.example.name
-  stack_name = aws_appstream_stack.example.name
-}
-
-resource "aws_appstream_stack" "example" {
-  name         = "stack name"
-  description  = "stack description"
-  display_name = "stack display name"
-  feedback_url = "http://your-domain/feedback"
-  redirect_url = "http://your-domain/redirect"
+resource "aws_appstream_stack" "this" {
+  name         = var.stack_name
+  description  = var.stack_description
+  display_name = var.stack_display_name
+  feedback_url = var.feedback_url
+  redirect_url = var.redirect_url
 
   storage_connectors {
-    connector_type = "HOMEFOLDERS"
+    connector_type = var.connector_type
+    domains = var.domains
+    resource_identifier = var.resource_identifier
   }
 
-  user_settings {
-    action     = "CLIPBOARD_COPY_FROM_LOCAL_DEVICE"
-    permission = "ENABLED"
-  }
-  user_settings {
-    action     = "CLIPBOARD_COPY_TO_LOCAL_DEVICE"
-    permission = "ENABLED"
-  }
-  user_settings {
-    action     = "DOMAIN_PASSWORD_SIGNIN"
-    permission = "ENABLED"
-  }
-  user_settings {
-    action     = "DOMAIN_SMART_CARD_SIGNIN"
-    permission = "DISABLED"
-  }
-  user_settings {
-    action     = "FILE_DOWNLOAD"
-    permission = "ENABLED"
-  }
-  user_settings {
-    action     = "FILE_UPLOAD"
-    permission = "ENABLED"
-  }
-  user_settings {
-    action     = "PRINTING_TO_LOCAL_DEVICE"
-    permission = "ENABLED"
+  dynamic "user_settings" {
+    for_each = var.user_settings
+
+    content {
+      action = upper(each.key)
+      permission = upper(user_settings.value.permission)
+    }
   }
 
   application_settings {
-    enabled        = true
-    settings_group = "SettingsGroup"
+    enabled        = var.enabled
+    settings_group = var.settings_group
   }
 
   streaming_experience_settings {
-    preferred_protocol = "TCP"
+    preferred_protocol = var.preferred_protocol
   }
 
-  tags = {
-    TagName = "TagValue"
-  }
+  tags = var.tags
+}
+
+//More than likely will need to be part of a submodule so have finer control over 
+//associations
+resource "aws_appstream_fleet_stack_association" "this" {
+  fleet_name = aws_appstream_fleet.this[0].fleet_name
+  stack_name = aws_appstream_stack.this[0].stack_name
 }
