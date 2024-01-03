@@ -16,6 +16,30 @@ variable "compute_capacity" {
   type = number
 }
 
+variable "directory_config_name" {
+  description = "Fully qualified name of the directory"
+  type = string
+  default = null
+}
+
+variable "directory_config_ou" {
+  description = " (Required) Distinguished names of the organizational units for computer accounts."
+  type = list(string)
+  default = null
+}
+
+variable "directory_config_account" {
+  description = "(Required) User name of the account. This account must have the following privileges: create computer objects, join computers to the domain, and change/reset the password on descendant computer objects for the organizational units specified."
+  type = string
+  default = null
+}
+
+variable "directory_config_password" {
+  description = "(Required) Password for the account."
+  type = string
+  default = null
+}
+
 variable "desired_instances" {
   description = "(Required) Desired number of streaming instances."
   type = number
@@ -96,6 +120,42 @@ variable "iam_role_arn" {
 variable "idle_disconnect_timeout_in_seconds" {
   description = "(Optional) Amount of time that users can be idle (inactive) before they are disconnected from their streaming session and the disconnect_timeout_in_seconds time interval begins."
   type = number
+  default = null
+}
+
+variable "imagine_builder_decription" {
+  description = "(Optional) Description to display."
+  type = string
+  default = null
+}
+
+variable "imagine_builder_display_name" {
+  description = "(Optional) Human-readable friendly name for the AppStream image builder."
+  type = string
+  default = null
+}
+
+variable "imagine_builder_enable_internet_access" {
+  description = "(Optional) Enables or disables default internet access for the image builder."
+  type = string
+  default = null
+}
+
+variable "imagine_builder_instance_type" {
+  description = "(Required) Instance type to use when launching the image builder."
+  type = string
+  default = null
+}
+
+variable "imagine_builder_image_name" {
+  description = " (Optional, Required if image_arn not provided) Name of the image used to create the image builder."
+  type = string
+  default = null
+}
+
+variable "imagine_builder_name" {
+  description = "(Required) Unique name for the image builder."
+  type = string
   default = null
 }
 

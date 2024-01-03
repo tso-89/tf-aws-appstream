@@ -1,7 +1,7 @@
 
-/************************************************************************************
-Resources
-************************************************************************************/
+#######################################################
+# Appstream 2.0
+#######################################################
 resource "aws_appstream_fleet" "this" {
   name = var.fleet_name
 
@@ -71,9 +71,33 @@ resource "aws_appstream_stack" "this" {
   tags = var.tags
 }
 
-//More than likely will need to be part of a submodule so have finer control over 
-//associations
 resource "aws_appstream_fleet_stack_association" "this" {
   fleet_name = aws_appstream_fleet.this[0].fleet_name
   stack_name = aws_appstream_stack.this[0].stack_name
+}
+
+
+resource "aws_appstream_directory_config" "this" {
+  directory_name                          = var.directory_config_name
+  organizational_unit_distinguished_names = var.directory_config_ou
+
+  service_account_credentials {
+    account_name     = var.directory_config_account
+    account_password = var.directory_config_password
+  }
+}
+
+resource "aws_appstream_image_builder" "this" {
+  name                           = var.imagine_builder_name
+  description                    = var.imagine_builder_decription
+  display_name                   = var.imagine_builder_display_name
+  enable_default_internet_access = var.imagine_builder_enable_internet_access
+  image_name                     = var.imagine_builder_image_name
+  instance_type                  = var.imagine_builder_instance_type
+
+  vpc_config {
+    subnet_ids = [aws_subnet.example.id]
+  }
+
+  tags = var.tags
 }
